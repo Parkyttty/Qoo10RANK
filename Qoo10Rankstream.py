@@ -3,13 +3,13 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
-st.title("Qoo10 브랜드 순위 추적기")
+st.title("Qoo10 순위 추적기")
 
 # 브랜드 입력 받기
-brands_input = st.text_input("찾고 싶은 브랜드명을 입력하세요 (여러 개는 ,로 구분)", "셀러샵 계정이름 말고 브랜드이름 정확히 작성")
+brands_input = st.text_input("찾고 싶은 브랜드명을 입력하세요 (여러 개는 ,로 구분)", "TEST")
 
 if st.button("검색 시작"):
-    TARGET_BRANDS = [b.strip() for b in brands_input.split(",")]
+    TARGET_BRANDS = [b.strip().lower() for b in brands_input.split(",")]
     results = []
 
     for g in range(0, 11):
@@ -29,20 +29,24 @@ if st.button("검색 시작"):
             else:
                 category_name = f"g={g}"
 
-            for brand in TARGET_BRANDS:
-                items = soup.find_all("a", class_="txt_brand", title=brand)
+            items = soup.find_all("a", class_="txt_brand")
 
-                for item in items:
-                    parent = item.find_parent()
-                    rank_tag = parent.find_previous("span", class_="rank")
-                    if rank_tag:
-                        rank = rank_tag.text.strip()
-                        results.append({
-                            "category_g": g,
-                            "category_name": category_name,
-                            "brand": brand,
-                            "rank": rank
-                        })
+            for item in items:
+                brand_actual = item.get("title", "").strip()
+                brand_actual_lower = brand_actual.lower()
+                for target in TARGET_BRANDS:
+                    if target in brand_actual_lower:
+                        parent = item.find_parent()
+                        rank_tag = parent.find_previous("span", class_="rank")
+                        if rank_tag:
+                            rank = rank_tag.text.strip()
+                            results.append({
+                                "category_g": g,
+                                "category_name": category_name,
+                                "searched_brand": target,
+                                "matched_brand": brand_actual,
+                                "rank": rank
+                            })
 
         except Exception as e:
             st.error(f"g={g} 페이지 로드 실패: {e}")
