@@ -38,6 +38,9 @@ if st.button("검색 시작"):
                     if target in brand_actual_lower:
                         parent = item.find_parent()
                         rank_tag = parent.find_previous("span", class_="rank")
+                        title_tag = parent.find_previous("a", class_="tt")
+                        product_title = title_tag.get("title", "").strip() if title_tag else ""
+
                         if rank_tag:
                             rank = rank_tag.text.strip()
                             results.append({
@@ -45,7 +48,8 @@ if st.button("검색 시작"):
                                 "category_name": category_name,
                                 "searched_brand": target,
                                 "matched_brand": brand_actual,
-                                "rank": rank
+                                "rank": rank,
+                                "product_title": product_title
                             })
 
         except Exception as e:
