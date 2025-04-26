@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
-st.title("Qoo10 순위 추적기")
+st.title("Qoo10 브랜드 순위 추적기 PC")
 
 # 브랜드 입력 받기
 brands_input = st.text_input("찾고 싶은 브랜드명을 입력하세요 (여러 개는 ,로 구분)", "TEST")
@@ -29,28 +29,32 @@ if st.button("검색 시작"):
             else:
                 category_name = f"g={g}"
 
-            items = soup.find_all("a", class_="txt_brand")
+            lis = soup.find_all('li')
+            for li in lis:
+                brand_tag = li.find('a', class_='txt_brand')
+                if not brand_tag:
+                    continue
 
-            for item in items:
-                brand_actual = item.get("title", "").strip()
+                brand_actual = brand_tag.get('title', '').strip()
                 brand_actual_lower = brand_actual.lower()
+
                 for target in TARGET_BRANDS:
                     if target in brand_actual_lower:
-                        parent = item.find_parent()
-                        rank_tag = parent.find_previous("span", class_="rank")
-                        title_tag = parent.find_previous("a", class_="tt")
-                        product_title = title_tag.get("title", "").strip() if title_tag else ""
+                        rank_tag = li.find('span', class_='rank')
+                        title_tag = li.find('a', class_='tt')
+                        li_id = li.get('id', '')
 
-                        if rank_tag:
-                            rank = rank_tag.text.strip()
-                            results.append({
-                                "category_g": g,
-                                "category_name": category_name,
-                                "searched_brand": target,
-                                "matched_brand": brand_actual,
-                                "rank": rank,
-                                "product_title": product_title
-                            })
+                        product_id = li_id.replace('g_', '') if li_id.startswith('g_') else li_id
+
+                        results.append({
+                            'category_g': g,
+                            'category_name': category_name,
+                            'searched_brand': target,
+                            'matched_brand': brand_actual,
+                            'rank': rank_tag.text.strip() if rank_tag else '',
+                            'product_title': title_tag.get('title', '').strip() if title_tag else '',
+                            'product_id': product_id
+                        })
 
         except Exception as e:
             st.error(f"g={g} 페이지 로드 실패: {e}")
