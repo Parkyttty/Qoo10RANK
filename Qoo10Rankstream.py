@@ -6,7 +6,7 @@ import pandas as pd
 st.title("Qoo10 브랜드 순위 추적기")
 
 # 브랜드 입력 받기
-brands_input = st.text_input("찾고 싶은 브랜드명을 입력하세요 (여러 개는 ,로 구분)", "muhav")
+brands_input = st.text_input("찾고 싶은 브랜드명을 입력하세요 (여러 개는 ,로 구분)", "셀러샵 계정이름 말고 브랜드이름 정확히 작성")
 
 if st.button("검색 시작"):
     TARGET_BRANDS = [b.strip() for b in brands_input.split(",")]
